@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" spacing="10.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.jacobwigent.wiretap.Controller">
+  <padding>
+    <Insets bottom="20" left="20" right="20" top="20" />
+  </padding>
+  <Label style="-fx-font-size: 20px;" text="WireTap" />
+  <Label style="-fx-font-size: 14px;" text="Serial Monitor" />
+
+  <ComboBox fx:id="portComboBox" onAction="#validateConnectionOptions" prefWidth="200" promptText="Select Serial Port" />
+  <ComboBox fx:id="baudComboBox" onAction="#validateConnectionOptions" prefWidth="200" promptText="Baud Rate" />
+
+  <Button fx:id="connectButton" disable="true" onAction="#onConnectClick" text="Connect" />
+  <TextArea fx:id="serialOutput" editable="false" prefColumnCount="30" prefRowCount="10" wrapText="true" />
+
+  <Button onAction="#onSaveClick" text="Save to File" />
+</VBox>
