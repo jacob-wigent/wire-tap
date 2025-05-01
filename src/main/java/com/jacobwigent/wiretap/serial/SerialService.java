@@ -16,11 +16,13 @@ public class SerialService {
         listener = l;
     }
 
+    private static long currentConnectionStartTime;
     private static int messageCount = 0;
 
     public static String[] getAvailablePorts() {
         SerialPort[] serialPorts = SerialPort.getCommPorts();
         String[] portNames = new String[serialPorts.length];
+
         for (int i = 0; i < serialPorts.length; i++) {
             portNames[i] = serialPorts[i].getSystemPortName();
         }
@@ -30,6 +32,8 @@ public class SerialService {
     public static boolean tryConnect() {
         if (!currentPort.openPort()) { return false; }
         addEventListeners(currentPort);
+        currentConnectionStartTime = System.currentTimeMillis();
+        messageCount = 0;
         return true;
     }
 
@@ -85,5 +89,11 @@ public class SerialService {
 
     public static SerialPort getCurrentPort() {
         return currentPort;
+    }
+
+    public static long getElapsedConnectionTime() {
+        if(currentPort == null) { return 0; }
+        if(!currentPort.isOpen()) { return 0; }
+        return System.currentTimeMillis() - currentConnectionStartTime;
     }
 }

@@ -7,10 +7,11 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class WireTap extends Application {
 
-    private static final String VERSION = "0.1";
+    private static final String VERSION = "0.1.0";
     private static final int MIN_WIDTH = 680;
     private static final int MIN_HEIGHT = 420;
 
@@ -22,6 +23,7 @@ public class WireTap extends Application {
         stage.setMinHeight(MIN_HEIGHT);
         //stage.setMaximized(true);
         stage.setTitle("WireTap " + VERSION);
+        stage.getIcons().add(new Image(WireTap.class.getResourceAsStream("/com/jacobwigent/wiretap/icon.png")));
         stage.setScene(scene);
         stage.show();
     }

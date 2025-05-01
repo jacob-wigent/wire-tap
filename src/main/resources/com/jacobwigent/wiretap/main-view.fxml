@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jacobwigent.wiretap.*?>
+<?import com.jacobwigent.wiretap.display.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox spacing="10.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jacobwigent.wiretap.Controller">
+<VBox spacing="10.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jacobwigent.wiretap.display.Controller">
   <MenuBar prefHeight="25.0" prefWidth="2152.0">
     <Menu mnemonicParsing="false" text="File">
       <MenuItem mnemonicParsing="false" text="Close" />
@@ -48,6 +48,7 @@
                   <children>
                     <Label fx:id="connectionStatusLabel" text="Connected" />
                     <Pane HBox.hgrow="ALWAYS" /> <!-- Flexible spacer -->
+                    <CheckBox fx:id="freezeToggle" onAction="#updateFreeze">Freeze</CheckBox>
                     <Button mnemonicParsing="false" onAction="#clearMonitor" text="Clear" />
                   </children>
                            <VBox.margin>

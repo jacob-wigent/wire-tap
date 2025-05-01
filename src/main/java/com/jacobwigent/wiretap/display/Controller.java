@@ -1,9 +1,13 @@
-package com.jacobwigent.wiretap;
+package com.jacobwigent.wiretap.display;
 
 import com.jacobwigent.wiretap.serial.SerialListener;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import com.jacobwigent.wiretap.serial.SerialService;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+
 
 public class Controller implements SerialListener {
 
@@ -14,9 +18,9 @@ public class Controller implements SerialListener {
     @FXML private Button connectButton;
     @FXML private Label connectionUpdateLabel;
     @FXML private Label connectionStatusLabel;
+    @FXML private CheckBox freezeToggle;
 
     private boolean connected = false;
-    private long messagesCount;
 
     /*
         Populates fields with available ports and baud rates.
@@ -91,7 +95,6 @@ public class Controller implements SerialListener {
     public void onSerialData(String data) {
         javafx.application.Platform.runLater(() -> {
                     serialMonitor.print(data);
-                    messagesCount = SerialService.getMessageCount();
                     updateSerialStats();
                 }
         );
@@ -113,7 +116,14 @@ public class Controller implements SerialListener {
     }
 
     private void updateSerialStats() {
-        String text = "Message Count: " + messagesCount + "\n";
+        String text =
+                "Message Count: " + SerialService.getMessageCount() + "\n" +
+                "Connection Time: " + SerialMessage.formatTime(SerialService.getElapsedConnectionTime()) + "\n";
         serialStatistics.setText(text);
+    }
+
+    @FXML
+    public void updateFreeze() {
+        serialMonitor.setFreeze(freezeToggle.isSelected());
     }
 }
