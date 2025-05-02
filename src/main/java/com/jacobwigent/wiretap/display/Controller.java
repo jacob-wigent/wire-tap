@@ -8,8 +8,14 @@ import com.jacobwigent.wiretap.serial.SerialService;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
+import javax.usb.UsbException;
+import javax.usb.UsbHostManager;
+import javax.usb.UsbServices;
+import javax.usb.event.UsbServicesEvent;
+import javax.usb.event.UsbServicesListener;
 
-public class Controller implements SerialListener {
+
+public class Controller implements SerialListener, UsbServicesListener {
 
     @FXML private Label serialStatistics;
     @FXML private ComboBox<String> portComboBox;
@@ -28,13 +34,25 @@ public class Controller implements SerialListener {
      */
     @FXML
     public void initialize() {
+        loadAvailablePorts();
+        SerialService.setListener(this);
+        UsbServices services = null;
+        try {
+            services = UsbHostManager.getUsbServices();
+        } catch (UsbException e) {
+            throw new RuntimeException(e);
+        }
+        services.addUsbServicesListener(this);
+    }
+
+    private void loadAvailablePorts() {
+        portComboBox.getItems().clear();
         for (int baudRate : SerialService.baudRates) {
             baudComboBox.getItems().add(Integer.toString(baudRate));
         }
         portComboBox.getItems().addAll(SerialService.getAvailablePorts());
         updateConnectionInfo();
         updateSerialStats();
-        SerialService.setListener(this);
     }
 
     @FXML
@@ -108,6 +126,16 @@ public class Controller implements SerialListener {
             updateConnectionInfo();
             connectionUpdateLabel.setText("Lost Connection");
         });
+    }
+
+    @Override
+    public void usbDeviceAttached(UsbServicesEvent usbServicesEvent) {
+        javafx.application.Platform.runLater(this::loadAvailablePorts);
+    }
+
+    @Override
+    public void usbDeviceDetached(UsbServicesEvent usbServicesEvent) {
+        javafx.application.Platform.runLater(this::loadAvailablePorts);
     }
 
     @FXML

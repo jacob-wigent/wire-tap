@@ -5,13 +5,14 @@ import javafx.scene.control.TextArea;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 public class SerialMonitor extends TextArea {
 
     private boolean frozen = false;
 
-    private final ArrayList<SerialMessage> messages = new ArrayList<>();
-    private final ArrayList<SerialMessage> messageBuffer = new ArrayList<>();
+    private final List<SerialMessage> messages = new ArrayList<>();
+    private final List<SerialMessage> messageBuffer = new ArrayList<>();
 
     public void print(Object obj) {
         SerialMessage msg = new SerialMessage(SerialService.getElapsedConnectionTime(), LocalDateTime.now(), obj.toString());
