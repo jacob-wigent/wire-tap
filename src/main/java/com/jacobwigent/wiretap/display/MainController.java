@@ -1,21 +1,33 @@
 package com.jacobwigent.wiretap.display;
 
+import com.jacobwigent.wiretap.WireTap;
 import com.jacobwigent.wiretap.serial.SerialListener;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import com.jacobwigent.wiretap.serial.SerialService;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import javax.usb.UsbException;
 import javax.usb.UsbHostManager;
 import javax.usb.UsbServices;
 import javax.usb.event.UsbServicesEvent;
 import javax.usb.event.UsbServicesListener;
+import java.awt.*;
+import java.io.IOException;
+import java.net.URI;
 
 
-public class Controller implements SerialListener, UsbServicesListener {
+public class MainController implements SerialListener, UsbServicesListener {
 
     @FXML private Label serialStatistics;
     @FXML private ComboBox<String> portComboBox;
@@ -35,8 +47,9 @@ public class Controller implements SerialListener, UsbServicesListener {
     @FXML
     public void initialize() {
         loadAvailablePorts();
+        loadBaudRates();
         SerialService.setListener(this);
-        UsbServices services = null;
+        UsbServices services;
         try {
             services = UsbHostManager.getUsbServices();
         } catch (UsbException e) {
@@ -47,10 +60,16 @@ public class Controller implements SerialListener, UsbServicesListener {
 
     private void loadAvailablePorts() {
         portComboBox.getItems().clear();
+        portComboBox.getItems().addAll(SerialService.getAvailablePorts());
+        updateConnectionInfo();
+        updateSerialStats();
+    }
+
+    protected void loadBaudRates() {
+        baudComboBox.getItems().clear();
         for (int baudRate : SerialService.baudRates) {
             baudComboBox.getItems().add(Integer.toString(baudRate));
         }
-        portComboBox.getItems().addAll(SerialService.getAvailablePorts());
         updateConnectionInfo();
         updateSerialStats();
     }
@@ -67,7 +86,10 @@ public class Controller implements SerialListener, UsbServicesListener {
             SerialService.selectBaudRate(Integer.parseInt(baud));
         }
 
-        connectButton.setDisable(!validOptions);
+        // Test for connection to prevent softlocking if all baud options are removed
+        if(!connected) {
+            connectButton.setDisable(!validOptions);
+        }
     }
 
     @FXML
@@ -153,5 +175,64 @@ public class Controller implements SerialListener, UsbServicesListener {
     @FXML
     public void updateFreeze() {
         serialMonitor.setFreeze(freezeToggle.isSelected());
+    }
+
+    @FXML
+    public void closeApplication() {
+        javafx.application.Platform.exit();
+    }
+
+    @FXML
+    public void openBaudRateMenu() {
+        FXMLLoader loader = new FXMLLoader(WireTap.class.getResource("baud-config-view.fxml"));
+
+        Parent root;
+        try {
+            root = loader.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        BaudConfigController controller = loader.getController();
+        controller.setMainController(this);
+
+        Stage dialog = new Stage();
+        dialog.setTitle("Configure Baud Rates");
+        dialog.setScene(new Scene(root));
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setResizable(false);
+        dialog.showAndWait();
+
+        loadBaudRates();
+    }
+
+    @FXML
+    public void openAboutMenu() {
+        Label infoLabel = new Label("WireTap v" + WireTap.VERSION +
+                "\n\nSerial monitor for microcontroller debugging.\n\n" +
+                "Author: Jacob Wigent\n" +
+                "MIT License\n\n" +
+                "GitHub: github.com/jwigent/wiretap");
+
+        infoLabel.setAlignment(Pos.CENTER);
+
+        VBox root = new VBox(infoLabel);
+        root.setAlignment(Pos.CENTER);
+        root.setPadding(new Insets(20));
+
+        Scene scene = new Scene(root);
+        Stage dialog = new Stage();
+        dialog.setTitle("About");
+        dialog.setScene(scene);
+        dialog.setResizable(false);
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.showAndWait();
+    }
+
+    @FXML
+    public void openSourceCode() {
+        try {
+            Desktop.getDesktop().browse(new URI("https://github.com/jacob-wigent/wire-tap"));
+        } catch (Exception ignored) {}
     }
 }

@@ -1,5 +1,6 @@
 package com.jacobwigent.wiretap;
 
+import com.jacobwigent.wiretap.serial.SerialService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -11,7 +12,7 @@ import java.util.Objects;
 
 public class WireTap extends Application {
 
-    private static final String VERSION = "0.1.0";
+    public static final String VERSION = "0.1.0";
     private static final int MIN_WIDTH = 680;
     private static final int MIN_HEIGHT = 420;
 
@@ -26,6 +27,11 @@ public class WireTap extends Application {
         stage.getIcons().add(new Image(WireTap.class.getResourceAsStream("/com/jacobwigent/wiretap/icon.png")));
         stage.setScene(scene);
         stage.show();
+    }
+
+    @Override
+    public void stop() {
+        SerialService.kill();
     }
 
     public static void main(String[] args) {

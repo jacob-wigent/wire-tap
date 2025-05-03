@@ -5,9 +5,11 @@ import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
 public class SerialService {
-    public static final int[] baudRates = {9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600};
+    public static List<Integer> baudRates = Arrays.asList(9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600);
 
     private static SerialPort currentPort;
     private static SerialListener listener;
@@ -46,6 +48,14 @@ public class SerialService {
         return messageCount;
     }
 
+    public static List<Integer> getBaudRates() {
+        return baudRates;
+    }
+
+    public static void setBaudRates (ArrayList<Integer> baudRates) {
+        SerialService.baudRates = baudRates;
+    }
+
     private static void addEventListeners(SerialPort port) {
         port.addDataListener(new SerialPortDataListener() {
             @Override
@@ -67,7 +77,6 @@ public class SerialService {
                         break;
 
                     case SerialPort.LISTENING_EVENT_PORT_DISCONNECTED:
-                        System.out.println("Disconnected from " + port.getSystemPortName());
                         if (listener != null) {
                             listener.onDisconnect();
                         }
@@ -95,5 +104,11 @@ public class SerialService {
         if(currentPort == null) { return 0; }
         if(!currentPort.isOpen()) { return 0; }
         return System.currentTimeMillis() - currentConnectionStartTime;
+    }
+
+    public static void kill() {
+        currentPort.closePort();
+        currentPort = null;
+        listener = null;
     }
 }

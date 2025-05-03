@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="320.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jacobwigent.wiretap.display.BaudConfigController">
+
+    <children>
+        <VBox prefHeight="300.0" prefWidth="380.0" spacing="10.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+            <children>
+
+                <Label text="Configure Baud Rates" />
+
+                <ScrollPane fitToWidth="true" prefHeight="200.0">
+                    <content>
+                        <VBox fx:id="baudRateList" spacing="5.0"/>
+                    </content>
+                </ScrollPane>
+
+                <HBox spacing="10.0">
+                    <children>
+                        <TextField fx:id="baudRateInput" promptText="Enter baud rate..." HBox.hgrow="ALWAYS" />
+                        <Button onAction="#onAddBaudRate" text="Add" />
+                    </children>
+                </HBox>
+
+                <HBox alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" minWidth="-Infinity" spacing="10.0">
+                    <children>
+                        <Button fx:id="saveButton" maxWidth="1.7976931348623157E308" onAction="#onSave" text="Save" HBox.hgrow="ALWAYS" />
+                        <Button maxWidth="1.7976931348623157E308" onAction="#onClose" text="Close" HBox.hgrow="ALWAYS" />
+                    </children>
+                </HBox>
+
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

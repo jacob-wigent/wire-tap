@@ -6,16 +6,18 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox spacing="10.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jacobwigent.wiretap.display.Controller">
+<VBox spacing="10.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jacobwigent.wiretap.display.MainController">
   <MenuBar prefHeight="25.0" prefWidth="2152.0">
     <Menu mnemonicParsing="false" text="File">
-      <MenuItem mnemonicParsing="false" text="Close" />
+      <MenuItem mnemonicParsing="false" text="Close" onAction="#closeApplication" />
     </Menu>
-    <Menu mnemonicParsing="false" text="Edit">
-      <MenuItem mnemonicParsing="false" text="Delete" />
+    <Menu mnemonicParsing="false" text="Tools">
+      <MenuItem mnemonicParsing="false" text="Baud Rates" onAction="#openBaudRateMenu" />
+<!--      <MenuItem mnemonicParsing="false" text="Data Parsing" />-->
     </Menu>
     <Menu mnemonicParsing="false" text="Help">
-      <MenuItem mnemonicParsing="false" text="About" />
+      <MenuItem mnemonicParsing="false" text="About" onAction="#openAboutMenu"/>
+      <MenuItem mnemonicParsing="false" text="View on GitHub" onAction="#openSourceCode" />
     </Menu>
   </MenuBar>
 
