@@ -2,6 +2,7 @@ package com.jacobwigent.wiretap.display;
 
 import com.jacobwigent.wiretap.WireTap;
 import com.jacobwigent.wiretap.serial.SerialListener;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -39,6 +40,8 @@ public class MainController implements SerialListener, UsbServicesListener {
     @FXML private CheckBox freezeToggle;
 
     private boolean connected = false;
+    private String selectedPort = null;
+    private String selectedBaudRate = null;
 
     /*
         Populates fields with available ports and baud rates.
@@ -60,7 +63,7 @@ public class MainController implements SerialListener, UsbServicesListener {
 
     private void loadAvailablePorts() {
         portComboBox.getItems().clear();
-        portComboBox.getItems().addAll(SerialService.getAvailablePorts());
+        portComboBox.getItems().addAll(SerialService.getAvailablePortNames());
         updateConnectionInfo();
         updateSerialStats();
     }
@@ -78,6 +81,9 @@ public class MainController implements SerialListener, UsbServicesListener {
     protected void onConnectionOptionsChange() {
         String port = portComboBox.getValue();
         String baud = baudComboBox.getValue();
+
+        selectedPort = port;
+        selectedBaudRate = baud;
 
         boolean validOptions = port != null && baud != null;
 
@@ -197,13 +203,11 @@ public class MainController implements SerialListener, UsbServicesListener {
         controller.setMainController(this);
 
         Stage dialog = new Stage();
-        dialog.setTitle("Configure Baud Rates");
+        dialog.setTitle("Baud Rate Configuration");
         dialog.setScene(new Scene(root));
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setResizable(false);
         dialog.showAndWait();
-
-        loadBaudRates();
     }
 
     @FXML
@@ -234,5 +238,36 @@ public class MainController implements SerialListener, UsbServicesListener {
         try {
             Desktop.getDesktop().browse(new URI("https://github.com/jacob-wigent/wire-tap"));
         } catch (Exception ignored) {}
+    }
+
+    @FXML
+    public void openPortInspector() {
+        FXMLLoader loader = new FXMLLoader(WireTap.class.getResource("port-inspector-view.fxml"));
+
+        Parent root;
+        try {
+            root = loader.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        PortInspectorController controller = loader.getController();
+        controller.setMainController(this);
+
+        Stage dialog = new Stage();
+        dialog.setTitle("Port Inspector");
+        dialog.setScene(new Scene(root));
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.showAndWait();
+    }
+
+    public String getSelectedPort() {
+        return selectedPort;
+    }
+
+    public void setSelectedPort(String selectedPort) {
+        this.selectedPort = selectedPort;
+        portComboBox.setValue(selectedPort);
+        onConnectionOptionsChange();
     }
 }

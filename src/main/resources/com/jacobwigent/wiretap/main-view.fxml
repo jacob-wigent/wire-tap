@@ -13,6 +13,7 @@
     </Menu>
     <Menu mnemonicParsing="false" text="Tools">
       <MenuItem mnemonicParsing="false" text="Baud Rates" onAction="#openBaudRateMenu" />
+      <MenuItem mnemonicParsing="false" text="Inspect Ports" onAction="#openPortInspector" />
 <!--      <MenuItem mnemonicParsing="false" text="Data Parsing" />-->
     </Menu>
     <Menu mnemonicParsing="false" text="Help">

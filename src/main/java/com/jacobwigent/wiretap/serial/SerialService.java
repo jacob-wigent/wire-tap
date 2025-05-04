@@ -21,7 +21,7 @@ public class SerialService {
     private static long currentConnectionStartTime;
     private static int messageCount = 0;
 
-    public static String[] getAvailablePorts() {
+    public static String[] getAvailablePortNames() {
         SerialPort[] serialPorts = SerialPort.getCommPorts();
         String[] portNames = new String[serialPorts.length];
 
@@ -86,6 +86,16 @@ public class SerialService {
         });
     }
 
+    public static boolean isConnected() {
+        if (currentPort == null) { return false; }
+        return currentPort.isOpen();
+    }
+
+    public static int getCurrentBaudRate() {
+        if (currentPort == null) { return 0; }
+        return currentPort.getBaudRate();
+    }
+
     public static void selectBaudRate(int baudRate) {
         if(currentPort == null) { return; }
         currentPort.setBaudRate(baudRate);
@@ -100,6 +110,10 @@ public class SerialService {
         return currentPort;
     }
 
+    public static SerialPort[] getAvailablePorts() {
+        return SerialPort.getCommPorts();
+    }
+
     public static long getElapsedConnectionTime() {
         if(currentPort == null) { return 0; }
         if(!currentPort.isOpen()) { return 0; }
@@ -107,6 +121,9 @@ public class SerialService {
     }
 
     public static void kill() {
+        if (currentPort == null) {
+            return;
+        }
         currentPort.closePort();
         currentPort = null;
         listener = null;
