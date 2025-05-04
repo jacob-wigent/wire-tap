@@ -75,6 +75,7 @@ public class MainController implements SerialListener, UsbServicesListener {
         }
         updateConnectionInfo();
         updateSerialStats();
+        onConnectionOptionsChange();
     }
 
     @FXML
@@ -133,6 +134,11 @@ public class MainController implements SerialListener, UsbServicesListener {
         connectButton.setText(connected ? "Disconnect" : "Connect");
         portComboBox.setDisable(connected);
         baudComboBox.setDisable(connected);
+
+        // Disables button if baud rate is removed, ONLY after any connection is ended
+        if (baudComboBox.getValue() == null && !connected) {
+            connectButton.setDisable(true);
+        }
 
         connectionStatusLabel.setText(connected ? "Connected to " + SerialService.getCurrentPort().getDescriptivePortName() + " @ " + SerialService.getCurrentPort().getBaudRate() : "Not Connected");
     }
