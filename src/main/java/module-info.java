@@ -5,7 +5,6 @@ module com.jacobwigent.wiretap {
     requires org.controlsfx.controls;
     requires com.fazecast.jSerialComm;
     requires java.desktop;
-    requires usb.api;
 
     opens com.jacobwigent.wiretap to javafx.fxml;
     exports com.jacobwigent.wiretap;

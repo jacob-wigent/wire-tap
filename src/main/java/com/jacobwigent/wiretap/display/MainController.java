@@ -18,17 +18,12 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-import javax.usb.UsbException;
-import javax.usb.UsbHostManager;
-import javax.usb.UsbServices;
-import javax.usb.event.UsbServicesEvent;
-import javax.usb.event.UsbServicesListener;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 
 
-public class MainController implements SerialListener, UsbServicesListener {
+public class MainController implements SerialListener {
 
     @FXML private Label serialStatistics;
     @FXML private ComboBox<String> portComboBox;
@@ -52,16 +47,11 @@ public class MainController implements SerialListener, UsbServicesListener {
         loadAvailablePorts();
         loadBaudRates();
         SerialService.setListener(this);
-        UsbServices services;
-        try {
-            services = UsbHostManager.getUsbServices();
-        } catch (UsbException e) {
-            throw new RuntimeException(e);
-        }
-        services.addUsbServicesListener(this);
     }
 
+    @FXML
     private void loadAvailablePorts() {
+        // TODO: Only reload if ports have changed
         portComboBox.getItems().clear();
         portComboBox.getItems().addAll(SerialService.getAvailablePortNames());
         updateConnectionInfo();
@@ -160,16 +150,6 @@ public class MainController implements SerialListener, UsbServicesListener {
             updateConnectionInfo();
             connectionUpdateLabel.setText("Lost Connection");
         });
-    }
-
-    @Override
-    public void usbDeviceAttached(UsbServicesEvent usbServicesEvent) {
-        javafx.application.Platform.runLater(this::loadAvailablePorts);
-    }
-
-    @Override
-    public void usbDeviceDetached(UsbServicesEvent usbServicesEvent) {
-        javafx.application.Platform.runLater(this::loadAvailablePorts);
     }
 
     @FXML

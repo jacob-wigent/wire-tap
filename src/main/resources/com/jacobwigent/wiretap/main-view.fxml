@@ -5,6 +5,7 @@
 <?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon ?>
 
 <VBox spacing="10.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jacobwigent.wiretap.display.MainController">
   <MenuBar prefHeight="25.0" prefWidth="2152.0">
@@ -27,7 +28,16 @@
     <AnchorPane>
       <children>
         <VBox spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-          <ComboBox fx:id="portComboBox" maxWidth="1.7976931348623157E308" minWidth="-Infinity" onAction="#onConnectionOptionsChange" promptText="Select Serial Port" />
+               <HBox spacing="5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                  <children>
+                <ComboBox HBox.hgrow="ALWAYS" fx:id="portComboBox" maxWidth="1.7976931348623157E308" minWidth="-Infinity" onAction="#onConnectionOptionsChange" promptText="Select Serial Port" />
+                    <Button onAction="#loadAvailablePorts" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false">
+                      <graphic>
+                        <FontIcon iconLiteral="mdi2r-refresh"/>
+                      </graphic>
+                    </Button>
+                  </children>
+               </HBox>
           <ComboBox fx:id="baudComboBox" maxWidth="1.7976931348623157E308" onAction="#onConnectionOptionsChange" promptText="Baud Rate" />
           <Button fx:id="connectButton" disable="true" maxWidth="1.7976931348623157E308" onAction="#onConnectClick" text="Connect" />
           <Label fx:id="connectionUpdateLabel" wrapText="true" />

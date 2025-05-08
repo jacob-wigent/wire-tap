@@ -19,11 +19,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-import javax.usb.event.UsbServicesEvent;
-import javax.usb.event.UsbServicesListener;
 import java.util.*;
 
-public class PortInspectorController implements UsbServicesListener {
+public class PortInspectorController {
 
     @FXML VBox portList;
     @FXML private Button selectButton;
@@ -38,13 +36,6 @@ public class PortInspectorController implements UsbServicesListener {
         selectButton.setDisable(true);
         portList.setPadding(new Insets(6, 6, 6, 6));
         updateDisplay();
-        try {
-            javax.usb.UsbServices usbServices = javax.usb.UsbHostManager.getUsbServices();
-            usbServices.addUsbServicesListener(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
     }
 
     public void setMainController(MainController mainController) {
@@ -117,16 +108,7 @@ public class PortInspectorController implements UsbServicesListener {
         mainController.setSelectedPort(selectedPort);
     }
 
-    @Override
-    public void usbDeviceAttached(UsbServicesEvent usbServicesEvent) {
-        javafx.application.Platform.runLater(this::reloadPorts);
-    }
-
-    @Override
-    public void usbDeviceDetached(UsbServicesEvent usbServicesEvent) {
-        javafx.application.Platform.runLater(this::reloadPorts);
-    }
-
+    @FXML
     private void reloadPorts() {
         serialPorts = Arrays.asList(SerialService.getAvailablePorts());
         boolean selectedPortRemoved = true;
