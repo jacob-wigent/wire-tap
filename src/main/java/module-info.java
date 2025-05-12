@@ -10,4 +10,6 @@ module com.jacobwigent.wiretap {
     exports com.jacobwigent.wiretap;
     exports com.jacobwigent.wiretap.display;
     opens com.jacobwigent.wiretap.display to javafx.fxml;
+    exports com.jacobwigent.wiretap.serial;
+    opens com.jacobwigent.wiretap.serial to javafx.fxml;
 }

@@ -1,45 +1,36 @@
 package com.jacobwigent.wiretap.display;
 
-import com.jacobwigent.wiretap.serial.SerialService;
+import com.jacobwigent.wiretap.serial.SerialLine;
+import com.jacobwigent.wiretap.serial.SerialMessage;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 
 public class SerialMonitor extends TextArea {
 
-    private boolean frozen = false;
-
-    private final List<SerialMessage> messages = new ArrayList<>();
-    private final List<SerialMessage> messageBuffer = new ArrayList<>();
+    private final ArrayList<SerialMessage> currentLineBuffer = new ArrayList<>();
+    private final ArrayList<SerialLine> lines = new ArrayList<>();
 
     public void print(Object obj) {
-        SerialMessage msg = new SerialMessage(SerialService.getElapsedConnectionTime(), LocalDateTime.now(), obj.toString());
-        messages.add(msg);
-        if (frozen) {
-            messageBuffer.add(msg);
-        } else {
-            this.appendText(msg.getMessage());
-        }
+        this.appendText(obj.toString());
     }
 
-    public void setFreeze(boolean frozen) {
-        this.frozen = frozen;
-        if (!frozen) {
-            emptyBuffer();
+    public void print(SerialMessage msg) {
+        currentLineBuffer.add(msg);
+        String text = msg.getText();
+        if (text.endsWith("\n")) {
+            lines.add(new SerialLine(currentLineBuffer));
+            currentLineBuffer.clear();
         }
-    }
-
-    private void emptyBuffer() {
-        if (messageBuffer.isEmpty()) { return; }
-        for (SerialMessage msg : messageBuffer) {
-            this.appendText(msg.getMessage());
-        }
-        messageBuffer.clear();
+        this.appendText(text);
     }
 
     public void clear() {
         super.clear();
+    }
+
+    public int getLineCount() {
+        return lines.size();
     }
 }
