@@ -9,17 +9,16 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class SerialService {
-    public static List<Integer> baudRates = Arrays.asList(9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600);
+    private static ArrayList<Integer> baudRates = new ArrayList<>(Arrays.asList(9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600));
 
     private static SerialPort currentPort;
-    private static SerialListener listener;
+    private static ArrayList<SerialListener> listeners = new ArrayList<>();
 
-    public static void setListener(SerialListener l) {
-        listener = l;
+    public static void addListener(SerialListener l) {
+        listeners.add(l);
     }
 
     private static long currentConnectionStartTime;
-    private static int messageCount = 0;
 
     public static String[] getAvailablePortNames() {
         SerialPort[] serialPorts = SerialPort.getCommPorts();
@@ -35,7 +34,6 @@ public class SerialService {
         if (!currentPort.openPort()) { return false; }
         addEventListeners(currentPort);
         currentConnectionStartTime = System.currentTimeMillis();
-        messageCount = 0;
         return true;
     }
 
@@ -44,11 +42,7 @@ public class SerialService {
         return currentPort.closePort();
     }
 
-    public static int getMessageCount() {
-        return messageCount;
-    }
-
-    public static List<Integer> getBaudRates() {
+    public static ArrayList<Integer> getBaudRates() {
         return baudRates;
     }
 
@@ -70,15 +64,18 @@ public class SerialService {
                         byte[] byteData = new byte[port.bytesAvailable()];
                         int numRead = port.readBytes(byteData, byteData.length);
                         String message = new String(byteData, 0, numRead);
-                        if (listener != null) {
-                            listener.onSerialData(message);
+                        if (listeners != null) {
+                            for (SerialListener l : listeners) {
+                                l.onSerialData(message);
+                            }
                         }
-                        messageCount++;
                         break;
 
                     case SerialPort.LISTENING_EVENT_PORT_DISCONNECTED:
-                        if (listener != null) {
-                            listener.onDisconnect();
+                        if (listeners != null) {
+                            for (SerialListener l : listeners) {
+                                l.onDisconnect();
+                            }
                         }
                         break;
                 }
@@ -126,6 +123,6 @@ public class SerialService {
         }
         currentPort.closePort();
         currentPort = null;
-        listener = null;
+        listeners = null;
     }
 }

@@ -3,6 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 <AnchorPane prefHeight="400.0" prefWidth="430.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jacobwigent.wiretap.display.PortInspectorController">
 
     <children>
@@ -19,6 +20,11 @@
 
                 <HBox alignment="CENTER_RIGHT" maxWidth="1.7976931348623157E308" minWidth="-Infinity" spacing="10.0">
                     <children>
+                        <Button onAction="#reloadPorts" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false">
+                            <graphic>
+                                <FontIcon iconLiteral="mdi2r-refresh"/>
+                            </graphic>
+                        </Button>
                         <Button fx:id="selectButton" maxWidth="1.7976931348623157E308" onAction="#onSelect" text="Select" HBox.hgrow="ALWAYS" />
                         <Button maxWidth="1.7976931348623157E308" onAction="#onClose" text="Close" HBox.hgrow="ALWAYS" />
                     </children>

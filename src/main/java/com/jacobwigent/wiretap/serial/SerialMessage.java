@@ -1,13 +1,13 @@
-package com.jacobwigent.wiretap.display;
+package com.jacobwigent.wiretap.serial;
 
 import java.time.LocalDateTime;
 
 public class SerialMessage {
-    final long elapsedMillis;
-    final LocalDateTime timestamp;
-    final String message;
+    private final long elapsedMillis;
+    private final LocalDateTime timestamp;
+    private final String message;
 
-    public SerialMessage(long elapsedMillis, LocalDateTime timestamp, String message) {
+    protected SerialMessage(long elapsedMillis, LocalDateTime timestamp, String message) {
         this.elapsedMillis = elapsedMillis;
         this.timestamp = timestamp;
         this.message = message;
@@ -21,7 +21,7 @@ public class SerialMessage {
         return timestamp;
     }
 
-    public String getMessage() {
+    public String getText() {
         return message;
     }
 

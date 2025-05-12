@@ -1,8 +1,9 @@
 package com.jacobwigent.wiretap.display;
 
 import com.jacobwigent.wiretap.WireTap;
+import com.jacobwigent.wiretap.serial.MessageHandler;
 import com.jacobwigent.wiretap.serial.SerialListener;
-import javafx.event.ActionEvent;
+import com.jacobwigent.wiretap.serial.SerialMessage;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -16,19 +17,15 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
-import javax.usb.UsbException;
-import javax.usb.UsbHostManager;
-import javax.usb.UsbServices;
-import javax.usb.event.UsbServicesEvent;
-import javax.usb.event.UsbServicesListener;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 
-public class MainController implements SerialListener, UsbServicesListener {
+public class MainController implements SerialListener {
 
     @FXML private Label serialStatistics;
     @FXML private ComboBox<String> portComboBox;
@@ -39,9 +36,13 @@ public class MainController implements SerialListener, UsbServicesListener {
     @FXML private Label connectionStatusLabel;
     @FXML private CheckBox freezeToggle;
 
+    private MessageHandler messageHandler;
+
     private boolean connected = false;
     private String selectedPort = null;
     private String selectedBaudRate = null;
+    private ArrayList<String> previousPorts;
+    private ArrayList<Integer> previousBauds;
 
     /*
         Populates fields with available ports and baud rates.
@@ -49,30 +50,45 @@ public class MainController implements SerialListener, UsbServicesListener {
      */
     @FXML
     public void initialize() {
+        messageHandler = new MessageHandler(serialMonitor);
         loadAvailablePorts();
         loadBaudRates();
-        SerialService.setListener(this);
-        UsbServices services;
-        try {
-            services = UsbHostManager.getUsbServices();
-        } catch (UsbException e) {
-            throw new RuntimeException(e);
-        }
-        services.addUsbServicesListener(this);
+        SerialService.addListener(this);
     }
 
+    @FXML
     private void loadAvailablePorts() {
+        String[] newPorts = SerialService.getAvailablePortNames();
+        // Only reload if newPorts have changed
+        if (comparePortList(previousPorts, newPorts)) { return; }
+        previousPorts = new ArrayList<>(Arrays.asList(newPorts));
         portComboBox.getItems().clear();
-        portComboBox.getItems().addAll(SerialService.getAvailablePortNames());
+        portComboBox.getItems().addAll(newPorts);
         updateConnectionInfo();
         updateSerialStats();
     }
 
+    private boolean comparePortList(ArrayList<String> list, String[] array) {
+        if (list == null) { return false; }
+        if (list.size() != array.length) {
+            return false;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            if (!list.get(i).equals(array[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     protected void loadBaudRates() {
+        ArrayList<Integer> newRates = SerialService.getBaudRates();
+        if (newRates.equals(previousBauds)) { return; }
         baudComboBox.getItems().clear();
-        for (int baudRate : SerialService.baudRates) {
+        for (int baudRate : newRates) {
             baudComboBox.getItems().add(Integer.toString(baudRate));
         }
+        previousBauds = newRates;
         updateConnectionInfo();
         updateSerialStats();
         onConnectionOptionsChange();
@@ -145,11 +161,7 @@ public class MainController implements SerialListener, UsbServicesListener {
 
     @Override
     public void onSerialData(String data) {
-        javafx.application.Platform.runLater(() -> {
-                    serialMonitor.print(data);
-                    updateSerialStats();
-                }
-        );
+        javafx.application.Platform.runLater(this::updateSerialStats);
     }
 
     @Override
@@ -162,16 +174,6 @@ public class MainController implements SerialListener, UsbServicesListener {
         });
     }
 
-    @Override
-    public void usbDeviceAttached(UsbServicesEvent usbServicesEvent) {
-        javafx.application.Platform.runLater(this::loadAvailablePorts);
-    }
-
-    @Override
-    public void usbDeviceDetached(UsbServicesEvent usbServicesEvent) {
-        javafx.application.Platform.runLater(this::loadAvailablePorts);
-    }
-
     @FXML
     public void clearMonitor() {
         serialMonitor.clear();
@@ -179,14 +181,15 @@ public class MainController implements SerialListener, UsbServicesListener {
 
     private void updateSerialStats() {
         String text =
-                "Message Count: " + SerialService.getMessageCount() + "\n" +
+                "Message Count: " + messageHandler.getMessageCount() + "\n" +
+                "Line Count: " + serialMonitor.getLineCount() + "\n" +
                 "Connection Time: " + SerialMessage.formatTime(SerialService.getElapsedConnectionTime()) + "\n";
         serialStatistics.setText(text);
     }
 
     @FXML
     public void updateFreeze() {
-        serialMonitor.setFreeze(freezeToggle.isSelected());
+        messageHandler.setFreeze(freezeToggle.isSelected());
     }
 
     @FXML
