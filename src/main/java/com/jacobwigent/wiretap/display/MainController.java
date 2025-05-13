@@ -35,6 +35,7 @@ public class MainController implements SerialListener {
     @FXML private Label connectionUpdateLabel;
     @FXML private Label connectionStatusLabel;
     @FXML private CheckBox freezeToggle;
+    @FXML private CheckBox scrollToggle;
 
     private MessageHandler messageHandler;
 
@@ -160,7 +161,7 @@ public class MainController implements SerialListener {
     }
 
     @Override
-    public void onSerialData(String data) {
+    public void onSerialData(SerialMessage msg) {
         javafx.application.Platform.runLater(this::updateSerialStats);
     }
 
@@ -181,8 +182,8 @@ public class MainController implements SerialListener {
 
     private void updateSerialStats() {
         String text =
-                "Message Count: " + messageHandler.getMessageCount() + "\n" +
-                "Line Count: " + serialMonitor.getLineCount() + "\n" +
+                "Message Count: " + messageHandler.getAllMessageCount() + "\n" +
+                "Line Count: " + messageHandler.getLineCount() + "\n" +
                 "Connection Time: " + SerialMessage.formatTime(SerialService.getElapsedConnectionTime()) + "\n";
         serialStatistics.setText(text);
     }
@@ -190,6 +191,11 @@ public class MainController implements SerialListener {
     @FXML
     public void updateFreeze() {
         messageHandler.setFreeze(freezeToggle.isSelected());
+    }
+
+    @FXML
+    public void updateScroll() {
+        serialMonitor.setAutoScroll(scrollToggle.isSelected());
     }
 
     @FXML

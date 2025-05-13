@@ -4,6 +4,7 @@ import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ public class SerialService {
                         String message = new String(byteData, 0, numRead);
                         if (listeners != null) {
                             for (SerialListener l : listeners) {
-                                l.onSerialData(message);
+                                l.onSerialData(new SerialMessage(getElapsedConnectionTime(), LocalDateTime.now(), message));
                             }
                         }
                         break;

@@ -5,12 +5,12 @@ import java.time.LocalDateTime;
 public class SerialMessage {
     private final long elapsedMillis;
     private final LocalDateTime timestamp;
-    private final String message;
+    private final String text;
 
-    protected SerialMessage(long elapsedMillis, LocalDateTime timestamp, String message) {
+    protected SerialMessage(long elapsedMillis, LocalDateTime timestamp, String text) {
         this.elapsedMillis = elapsedMillis;
         this.timestamp = timestamp;
-        this.message = message;
+        this.text = text.replace("\r\n", "\n").replace("\r", "\n");;
     }
 
     public long getElapsedMillis() {
@@ -22,11 +22,12 @@ public class SerialMessage {
     }
 
     public String getText() {
-        return message;
+        return text;
     }
 
-    public String getFormattedMessage() {
-        return "[" + formatTime(elapsedMillis) + "] " + message;
+    @Override
+    public String toString() {
+        return "[" + formatTime(elapsedMillis) + "] " + text;
     }
 
     public static String formatTime(long milliseconds) {
