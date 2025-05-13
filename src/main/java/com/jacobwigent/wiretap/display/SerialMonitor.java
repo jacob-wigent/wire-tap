@@ -17,24 +17,24 @@ public class SerialMonitor extends ListView<SerialLine> {
 
     public SerialMonitor() {
         this.setItems(displayedLines);
-        this.setCellFactory(list -> new ListCell<SerialLine>() {
+
+        this.setCellFactory(list -> new ListCell<>() {
+            private ListChangeListener<SerialMessage> listener;
             {
                 setOnMouseClicked(event -> {
                     if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
                         SerialLine line = getItem();
                         if (line != null) {
-                            System.out.println("Double clicked on: " + line.toString());
+                            System.out.println("Double clicked on: " + line.getLineText());
                         }
                     }
                 });
             }
-            private ListChangeListener<SerialMessage> listener;
-
             @Override
             protected void updateItem(SerialLine line, boolean empty) {
                 super.updateItem(line, empty);
 
-                // Remove old listener
+                // Remove old listener from previous item
                 if (listener != null && getItem() != null) {
                     getItem().getMessages().removeListener(listener);
                     listener = null;
@@ -42,19 +42,12 @@ public class SerialMonitor extends ListView<SerialLine> {
 
                 if (empty || line == null) {
                     setText(null);
-                    System.out.println("NULL SHIT");
                 } else {
-                    // show current content
-                    javafx.application.Platform.runLater(() -> {
-                        setText(line.toString());
-                    });
+                    // Set initial text
+                    setText(line.getLineText());
 
-                    // register a new listener so future add() calls re-render this cell
-                    listener = change -> {
-                        javafx.application.Platform.runLater(() -> {
-                           setText(line.toString());
-                        });
-                    };
+                    // Register listener to update text on future changes
+                    listener = change -> javafx.application.Platform.runLater(() -> setText(line.getLineText()));
                     line.getMessages().addListener(listener);
                 }
             }
@@ -63,39 +56,25 @@ public class SerialMonitor extends ListView<SerialLine> {
             while (change.next()) {
                 if (autoScroll && change.wasAdded()) {
                     int newIndex = change.getFrom();
-                    javafx.application.Platform.runLater(() -> {
-                        scrollTo(newIndex);
-                    });
+                    javafx.application.Platform.runLater(() -> scrollTo(newIndex));
                 }
             }
         });
-//        this.setCellFactory(list -> new ListCell<>() {
-//
-//            @Override
-//            protected void updateItem(SerialLine line, boolean empty) {
-//                System.out.println("Received Update");
-//                super.updateItem(line, empty);
-//                if (empty || line == null) {
-//                    setText(null);
-//                    System.out.println("Null or empty");
-//                } else {
-//                    System.out.println("line = " + line);
-//                    // Automatically update the text when messages in the line change
-//                    javafx.application.Platform.runLater(() -> {
-//                        setText(line.toString());
-//                    });
-//                }
-//            }
-//        });
     }
 
     public void addLine(SerialLine line) {
-        displayedLines.add(line);
+        javafx.application.Platform.runLater(() -> {
+            displayedLines.add(line);
+        });
     }
 
     public void clear() {
-        displayedLines.clear();
+        javafx.application.Platform.runLater(() -> {
+            displayedLines.clear();
+            this.refresh();
+        });
     }
+
 
     public void setAutoScroll(boolean autoScroll) {
         this.autoScroll = autoScroll;

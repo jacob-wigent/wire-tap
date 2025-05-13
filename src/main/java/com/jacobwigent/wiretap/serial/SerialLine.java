@@ -21,8 +21,7 @@ public class SerialLine {
         messages.add(msg);
     }
 
-    @Override
-    public String toString() {
+    public String getLineText() {
         StringBuilder sb = new StringBuilder();
         for (SerialMessage msg : messages) {
             sb.append(msg.getText());

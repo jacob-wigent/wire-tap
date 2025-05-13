@@ -134,6 +134,8 @@ public class MainController implements SerialListener {
             } else {
                 successful = SerialService.tryConnect();
                 connected = successful;
+                messageHandler.reset();
+                javafx.application.Platform.runLater(this::updateSerialStats);
             }
 
             // Update UI back on the JavaFX thread
@@ -182,7 +184,7 @@ public class MainController implements SerialListener {
 
     private void updateSerialStats() {
         String text =
-                "Message Count: " + messageHandler.getAllMessageCount() + "\n" +
+                "Message Count: " + messageHandler.getAccessibleMessageCount() + "\n" +
                 "Line Count: " + messageHandler.getLineCount() + "\n" +
                 "Connection Time: " + SerialMessage.formatTime(SerialService.getElapsedConnectionTime()) + "\n";
         serialStatistics.setText(text);
