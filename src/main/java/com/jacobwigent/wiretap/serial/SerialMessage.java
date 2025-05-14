@@ -10,7 +10,7 @@ public class SerialMessage {
     protected SerialMessage(long elapsedMillis, LocalDateTime timestamp, String text) {
         this.elapsedMillis = elapsedMillis;
         this.timestamp = timestamp;
-        this.text = text.replace("\r\n", "\n").replace("\r", "\n");;
+        this.text = text;//.replace("\r\n", "\n").replace("\r", "\n");;
     }
 
     public long getElapsedMillis() {
