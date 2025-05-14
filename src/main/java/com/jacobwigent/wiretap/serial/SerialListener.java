@@ -1,6 +1,6 @@
 package com.jacobwigent.wiretap.serial;
 
 public interface SerialListener {
-    void onSerialData(String data);
+    void onSerialData(SerialMessage msg);
     void onDisconnect();
 }

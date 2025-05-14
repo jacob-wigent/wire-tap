@@ -4,6 +4,7 @@ import com.jacobwigent.wiretap.WireTap;
 import com.jacobwigent.wiretap.serial.MessageHandler;
 import com.jacobwigent.wiretap.serial.SerialListener;
 import com.jacobwigent.wiretap.serial.SerialMessage;
+import com.jacobwigent.wiretap.util.Utilities;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -133,6 +134,9 @@ public class MainController implements SerialListener {
             } else {
                 successful = SerialService.tryConnect();
                 connected = successful;
+                if (successful) {
+                    messageHandler.flush();
+                }
             }
 
             // Update UI back on the JavaFX thread
@@ -142,6 +146,7 @@ public class MainController implements SerialListener {
                         ? (connected ? "Connected Successfully" : "Disconnected Successfully")
                         : (connected ? "Failed to Disconnect" : "Failed to Connect"));
                 updateConnectionInfo();
+                updateSerialStats();
             });
         }).start();
     }
@@ -160,7 +165,7 @@ public class MainController implements SerialListener {
     }
 
     @Override
-    public void onSerialData(String data) {
+    public void onSerialData(SerialMessage data) {
         javafx.application.Platform.runLater(this::updateSerialStats);
     }
 
@@ -182,8 +187,8 @@ public class MainController implements SerialListener {
     private void updateSerialStats() {
         String text =
                 "Message Count: " + messageHandler.getMessageCount() + "\n" +
-                "Line Count: " + serialMonitor.getLineCount() + "\n" +
-                "Connection Time: " + SerialMessage.formatTime(SerialService.getElapsedConnectionTime()) + "\n";
+                "Line Count: " + messageHandler.getLineCount() + "\n" +
+                "Connection Time: " + Utilities.formatTime(SerialService.getElapsedConnectionTime()) + "\n";
         serialStatistics.setText(text);
     }
 

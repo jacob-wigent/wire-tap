@@ -2,7 +2,6 @@ package com.jacobwigent.wiretap.serial;
 
 import com.jacobwigent.wiretap.display.SerialMonitor;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +13,7 @@ public class MessageHandler implements SerialListener {
 
     private final List<SerialMessage> messages = new ArrayList<>();
     private final List<SerialMessage> messageBuffer = new ArrayList<>();
+    private int lineCount = 0;
 
     public MessageHandler(SerialMonitor monitor) {
         this.monitor = monitor;
@@ -29,19 +29,23 @@ public class MessageHandler implements SerialListener {
 
     private void emptyBuffer() {
         for (SerialMessage msg : messageBuffer) {
-            monitor.print(msg);
+            javafx.application.Platform.runLater(() -> {
+                monitor.print(msg);
+            });
         }
         messageBuffer.clear();
     }
 
     @Override
-    public void onSerialData(String data) {
-        SerialMessage msg = new SerialMessage(SerialService.getElapsedConnectionTime(), LocalDateTime.now(), data);
+    public void onSerialData(SerialMessage msg) {
         messages.add(msg);
+        lineCount += (int) msg.getText().chars().filter(ch -> ch == '\n').count();
         if (frozen) {
             messageBuffer.add(msg);
         } else {
-            monitor.print(msg);
+            javafx.application.Platform.runLater(() -> {
+                monitor.print(msg);
+            });
         }
     }
 
@@ -50,5 +54,16 @@ public class MessageHandler implements SerialListener {
 
     public int getMessageCount() {
         return messages.size();
+    }
+
+    public int getLineCount() {
+        return lineCount;
+    }
+
+    public void flush() {
+        messages.clear();
+        messageBuffer.clear();
+        lineCount = 0;
+        monitor.clear();
     }
 }
