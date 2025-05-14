@@ -67,7 +67,7 @@ public class SerialService {
                         String message = new String(byteData, 0, numRead);
                         if (listeners != null) {
                             for (SerialListener l : listeners) {
-                                l.onSerialData(new SerialMessage(message, currentConnectionStartTime, LocalDateTime.now()));
+                                l.onSerialData(new SerialMessage(message, getElapsedConnectionTime(), LocalDateTime.now()));
                             }
                         }
                         break;

@@ -37,7 +37,7 @@ public class SerialPlotter extends LineChart<Number, Number> {
             String text = message.getText().trim();
             if (!text.isEmpty()) {
                 double y = Double.parseDouble(text);
-                double x = pointIndex++;//message.getElapsedMillis() / 1000.0; // Or use pointIndex++
+                double x = message.getElapsedMillis() / 1000.0; // Or use pointIndex++
                 series.getData().add(new XYChart.Data<>(x, y));
             }
         } catch (NumberFormatException e) {
