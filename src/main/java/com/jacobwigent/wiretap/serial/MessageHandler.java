@@ -100,7 +100,7 @@ public class MessageHandler implements SerialListener {
         deltaTimes = new int[10];
         javafx.application.Platform.runLater(() -> {
             monitor.clear();
-            plotter.clear();
+            plotter.reset();
         });
     }
 }

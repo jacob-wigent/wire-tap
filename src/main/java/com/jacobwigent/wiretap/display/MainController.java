@@ -191,7 +191,7 @@ public class MainController implements SerialListener {
         String text =
                 "Message Count: " + messageHandler.getMessageCount() + "\n" +
                 "Line Count: " + messageHandler.getLineCount() + "\n" +
-                "Average Message Rate: " + messageHandler.getAverageRate() + "ms\n" +
+                "Message Rate: " + messageHandler.getAverageRate() + "ms\n" +
                 "Connection Time: " + Utilities.formatTime(SerialService.getElapsedConnectionTime()) + "\n";
         serialStatistics.setText(text);
     }

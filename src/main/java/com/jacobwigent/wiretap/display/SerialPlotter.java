@@ -1,26 +1,31 @@
 package com.jacobwigent.wiretap.display;
 
 import com.jacobwigent.wiretap.serial.SerialMessage;
-import javafx.scene.chart.Axis;
-import javafx.scene.chart.Chart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.control.TextArea;
 
 import javafx.scene.chart.XYChart;
 
 public class SerialPlotter extends LineChart<Number, Number> {
 
+    private final NumberAxis xAxis;
+    private final NumberAxis yAxis;
     private final XYChart.Series<Number, Number> series;
+    private boolean indexed = false;
     private boolean autoScroll = true;
     private long pointIndex = 0;
+    private long lastMessageTime = 0;
 
     public SerialPlotter() {
         super(new NumberAxis(), new NumberAxis());
+        xAxis = (NumberAxis) this.getXAxis();
+        yAxis = (NumberAxis) this.getYAxis();
         this.series = new XYChart.Series<>();
         getData().add(series);
         setAnimated(false); // Improves performance for real-time data
         setLegendVisible(false);
+        xAxis.setAutoRanging(false);
+        xAxis.setTickUnit(1.0);
     }
 
     public void setAutoScroll(boolean autoScroll) {
@@ -30,6 +35,12 @@ public class SerialPlotter extends LineChart<Number, Number> {
     public void clear() {
         series.getData().clear();
         pointIndex = 0;
+        xAxis.setLowerBound(lastMessageTime / 1000.0);
+    }
+
+    public void reset() {
+        lastMessageTime = 0;
+        this.clear();
     }
 
     public void addData(SerialMessage message) {
@@ -37,7 +48,12 @@ public class SerialPlotter extends LineChart<Number, Number> {
             String text = message.getText().trim();
             if (!text.isEmpty()) {
                 double y = Double.parseDouble(text);
-                double x = message.getElapsedMillis() / 1000.0; // Or use pointIndex++
+                long currentMessageTime = message.getElapsedMillis();
+                if (currentMessageTime > lastMessageTime) {
+                    xAxis.setUpperBound(currentMessageTime / 1000.0);
+                }
+                lastMessageTime = message.getElapsedMillis();
+                double x = lastMessageTime / 1000.0;
                 series.getData().add(new XYChart.Data<>(x, y));
             }
         } catch (NumberFormatException e) {
