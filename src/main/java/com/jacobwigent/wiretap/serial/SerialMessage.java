@@ -8,7 +8,7 @@ public class SerialMessage {
     private final LocalDateTime timestamp;
 
     protected SerialMessage(String text, long elapsedMillis, LocalDateTime timestamp) {
-        this.text = text.replace("\r\n", "\n").replace("\r", "\n"); // Normalize line endings
+        this.text = text;//.replace("\r\n", "\n").replace("\r", "\n"); // Normalize line endings
         this.elapsedMillis = elapsedMillis;
         this.timestamp = timestamp;
     }

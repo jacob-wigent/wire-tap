@@ -64,6 +64,6 @@ public class MessageHandler implements SerialListener {
         messages.clear();
         messageBuffer.clear();
         lineCount = 0;
-        monitor.clear();
+        javafx.application.Platform.runLater(monitor::clear);
     }
 }
