@@ -1,6 +1,7 @@
 package com.jacobwigent.wiretap.serial;
 
 import com.jacobwigent.wiretap.display.SerialMonitor;
+import com.jacobwigent.wiretap.display.SerialPlotter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
 public class MessageHandler implements SerialListener {
 
     private final SerialMonitor monitor;
+    private final SerialPlotter plotter;
 
     private boolean frozen = false;
 
@@ -15,8 +17,9 @@ public class MessageHandler implements SerialListener {
     private final List<SerialMessage> messageBuffer = new ArrayList<>();
     private int lineCount = 0;
 
-    public MessageHandler(SerialMonitor monitor) {
+    public MessageHandler(SerialMonitor monitor, SerialPlotter plotter) {
         this.monitor = monitor;
+        this.plotter = plotter;
         SerialService.addListener(this);
     }
 
@@ -31,6 +34,7 @@ public class MessageHandler implements SerialListener {
         for (SerialMessage msg : messageBuffer) {
             javafx.application.Platform.runLater(() -> {
                 monitor.print(msg);
+                plotter.addData(msg);
             });
         }
         messageBuffer.clear();
@@ -45,6 +49,7 @@ public class MessageHandler implements SerialListener {
         } else {
             javafx.application.Platform.runLater(() -> {
                 monitor.print(msg);
+                plotter.addData(msg);
             });
         }
     }
@@ -64,6 +69,9 @@ public class MessageHandler implements SerialListener {
         messages.clear();
         messageBuffer.clear();
         lineCount = 0;
-        javafx.application.Platform.runLater(monitor::clear);
+        javafx.application.Platform.runLater(() -> {
+            monitor.clear();
+            plotter.clear();
+        });
     }
 }

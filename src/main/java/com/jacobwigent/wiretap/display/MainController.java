@@ -32,6 +32,7 @@ public class MainController implements SerialListener {
     @FXML private ComboBox<String> portComboBox;
     @FXML private ComboBox<String> baudComboBox;
     @FXML private SerialMonitor serialMonitor;
+    @FXML private SerialPlotter serialPlotter;
     @FXML private Button connectButton;
     @FXML private Label connectionUpdateLabel;
     @FXML private Label connectionStatusLabel;
@@ -52,7 +53,7 @@ public class MainController implements SerialListener {
      */
     @FXML
     public void initialize() {
-        messageHandler = new MessageHandler(serialMonitor);
+        messageHandler = new MessageHandler(serialMonitor, serialPlotter);
         loadAvailablePorts();
         loadBaudRates();
         SerialService.addListener(this);
@@ -183,12 +184,14 @@ public class MainController implements SerialListener {
     @FXML
     public void clearMonitor() {
         serialMonitor.clear();
+        serialPlotter.clear();
     }
 
     private void updateSerialStats() {
         String text =
                 "Message Count: " + messageHandler.getMessageCount() + "\n" +
                 "Line Count: " + messageHandler.getLineCount() + "\n" +
+                "Average Message Rate: 0.000\n" +
                 "Connection Time: " + Utilities.formatTime(SerialService.getElapsedConnectionTime()) + "\n";
         serialStatistics.setText(text);
     }
