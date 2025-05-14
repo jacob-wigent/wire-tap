@@ -36,6 +36,7 @@ public class MainController implements SerialListener {
     @FXML private Label connectionUpdateLabel;
     @FXML private Label connectionStatusLabel;
     @FXML private CheckBox freezeToggle;
+    @FXML private CheckBox scrollToggle;
 
     private MessageHandler messageHandler;
 
@@ -195,6 +196,11 @@ public class MainController implements SerialListener {
     @FXML
     public void updateFreeze() {
         messageHandler.setFreeze(freezeToggle.isSelected());
+    }
+
+    @FXML
+    public void updateScroll() {
+        serialMonitor.setAutoScroll(scrollToggle.isSelected());
     }
 
     @FXML
