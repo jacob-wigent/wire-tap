@@ -26,8 +26,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
+/**
+ * MainController handles the logic for the main GUI window.
+ * It manages serial port connections, user input for port and baud rate,
+ * and updates the serial monitor and plotter displays based on incoming data.
+ */
 public class MainController implements SerialListener {
 
+    // FXML-injected fields for UI controls
     @FXML private Label serialStatistics;
     @FXML private ComboBox<String> portComboBox;
     @FXML private ComboBox<String> baudComboBox;
@@ -40,16 +46,16 @@ public class MainController implements SerialListener {
     @FXML private CheckBox scrollToggle;
 
     private MessageHandler messageHandler;
-
     private boolean connected = false;
     private String selectedPort = null;
     private String selectedBaudRate = null;
     private ArrayList<String> previousPorts;
     private ArrayList<Integer> previousBauds;
 
-    /*
-        Populates fields with available ports and baud rates.
-        Called by the FXML loader after the FXML file is loaded and all @FXML-annotated elements have been injected.
+    /**
+     * Called automatically after FXML is loaded.
+     * Initializes the message handler, populates available ports and baud rates,
+     * and registers this controller as a SerialListener.
      */
     @FXML
     public void initialize() {
@@ -59,23 +65,34 @@ public class MainController implements SerialListener {
         SerialService.addListener(this);
     }
 
+    /**
+     * Loads the list of currently available serial ports into the combo box.
+     * Skips update if the port list hasn't changed.
+     */
     @FXML
     private void loadAvailablePorts() {
         String[] newPorts = SerialService.getAvailablePortNames();
-        // Only reload if newPorts have changed
         if (comparePortList(previousPorts, newPorts)) { return; }
+
         previousPorts = new ArrayList<>(Arrays.asList(newPorts));
         portComboBox.getItems().clear();
         portComboBox.getItems().addAll(newPorts);
+
         updateConnectionInfo();
         updateSerialStats();
     }
 
+    /**
+     * Compares a previous list of ports to a new array to determine if the UI needs updating.
+     *
+     * @param list  Previously stored list of port names
+     * @param array New list of port names
+     * @return true if lists are identical, false otherwise
+     */
     private boolean comparePortList(ArrayList<String> list, String[] array) {
-        if (list == null) { return false; }
-        if (list.size() != array.length) {
-            return false;
-        }
+        if (list == null) return false;
+        if (list.size() != array.length) return false;
+
         for (int i = 0; i < list.size(); i++) {
             if (!list.get(i).equals(array[i])) {
                 return false;
@@ -84,19 +101,30 @@ public class MainController implements SerialListener {
         return true;
     }
 
+    /**
+     * Loads available baud rates into the combo box.
+     * Prevents reloading if baud rates haven't changed.
+     */
     protected void loadBaudRates() {
         ArrayList<Integer> newRates = SerialService.getBaudRates();
-        if (newRates.equals(previousBauds)) { return; }
+        if (newRates.equals(previousBauds)) return;
+
         baudComboBox.getItems().clear();
         for (int baudRate : newRates) {
             baudComboBox.getItems().add(Integer.toString(baudRate));
         }
+
         previousBauds = newRates;
+
         updateConnectionInfo();
         updateSerialStats();
         onConnectionOptionsChange();
     }
 
+    /**
+     * Updates internal state and SerialService when the user changes connection settings.
+     * Enables the connect button only when valid options are selected.
+     */
     @FXML
     protected void onConnectionOptionsChange() {
         String port = portComboBox.getValue();
@@ -112,36 +140,42 @@ public class MainController implements SerialListener {
             SerialService.selectBaudRate(Integer.parseInt(baud));
         }
 
-        // Test for connection to prevent softlocking if all baud options are removed
-        if(!connected) {
+        // Prevent user from clicking connect if the selection is incomplete
+        if (!connected) {
             connectButton.setDisable(!validOptions);
         }
     }
 
+    /**
+     * Handles connect/disconnect button clicks.
+     * Performs connection in a background thread to avoid blocking the UI.
+     */
     @FXML
     protected void onConnectClick() {
-        // Update UI immediately
+        // Disable controls immediately for responsiveness
         connectButton.setDisable(true);
         portComboBox.setDisable(true);
         baudComboBox.setDisable(true);
         connectionUpdateLabel.setText(connected ? "Disconnecting..." : "Connecting...");
 
-        // Run connection logic in a background thread
+        // Create background thread to avoid locking UI while conencting
         new Thread(() -> {
             boolean successful;
 
             if (connected) {
+                // Try disconnecting
                 successful = SerialService.tryDisconnect();
                 connected = !successful;
             } else {
+                // Try connecting
                 successful = SerialService.tryConnect();
                 connected = successful;
                 if (successful) {
-                    messageHandler.flush();
+                    messageHandler.flush(); // Clear any previous serial data
                 }
             }
 
-            // Update UI back on the JavaFX thread
+            // Update UI elements on JavaFX Application thread
             javafx.application.Platform.runLater(() -> {
                 connectButton.setDisable(false);
                 connectionUpdateLabel.setText(successful
@@ -153,26 +187,37 @@ public class MainController implements SerialListener {
         }).start();
     }
 
+    /**
+     * Updates the connection UI elements based on current connection state.
+     * Called whenever connection or combo box values change.
+     */
     private void updateConnectionInfo() {
         connectButton.setText(connected ? "Disconnect" : "Connect");
         portComboBox.setDisable(connected);
         baudComboBox.setDisable(connected);
 
-        // Disables button if baud rate is removed, ONLY after any connection is ended
+        // Prevents user from connecting with no baud rate selected
         if (baudComboBox.getValue() == null && !connected) {
             connectButton.setDisable(true);
         }
 
-        connectionStatusLabel.setText(connected ? "Connected to " + SerialService.getConnectionInfo() : "Not Connected");
+        connectionStatusLabel.setText(connected
+                ? "Connected to " + SerialService.getConnectionInfo()
+                : "Not Connected");
     }
 
     @Override
     public void onSerialData(SerialMessage data) {
+        // Update stats on the JavaFX thread when new serial data arrives
         javafx.application.Platform.runLater(this::updateSerialStats);
     }
 
+    /**
+     * Handles loss of serial connection by forcing a disconnect update and updating UI.
+     */
     @Override
     public void onDisconnect() {
+        // Clean up UI and state when a disconnect is detected
         javafx.application.Platform.runLater(() -> {
             SerialService.tryDisconnect();
             connected = false;
@@ -181,36 +226,54 @@ public class MainController implements SerialListener {
         });
     }
 
+    /**
+     * Clears both the text-based serial monitor and graphical plotter display.
+     */
     @FXML
     public void clearMonitor() {
         serialMonitor.clear();
         serialPlotter.clear();
     }
 
+    /**
+     * Updates the label showing serial statistics such as message rate, count, and connection time.
+     */
     private void updateSerialStats() {
         String text =
                 "Message Count: " + messageHandler.getMessageCount() + "\n" +
-                "Line Count: " + messageHandler.getLineCount() + "\n" +
-                "Message Rate: " + messageHandler.getAverageRate() + "ms\n" +
-                "Connection Time: " + Utilities.formatTime(SerialService.getElapsedConnectionTime()) + "\n";
+                        "Line Count: " + messageHandler.getLineCount() + "\n" +
+                        "Message Rate: " + messageHandler.getAverageRate() + "ms\n" +
+                        "Connection Time: " + Utilities.formatTime(SerialService.getElapsedConnectionTime()) + "\n";
         serialStatistics.setText(text);
     }
 
+    /**
+     * Toggles whether the serial input is being diplayed
+     */
     @FXML
     public void updateFreeze() {
         messageHandler.setFreeze(freezeToggle.isSelected());
     }
 
+    /**
+     * Enables or disables automatic scrolling in the monitor display.
+     */
     @FXML
     public void updateScroll() {
         serialMonitor.setAutoScroll(scrollToggle.isSelected());
     }
 
+    /**
+     * Cleanly quits the application via JavaFX exit function.
+     */
     @FXML
     public void closeApplication() {
         javafx.application.Platform.exit();
     }
 
+    /**
+     * Opens a modal dialog allowing the user to edit the list of available baud rates.
+     */
     @FXML
     public void openBaudRateMenu() {
         FXMLLoader loader = new FXMLLoader(WireTap.class.getResource("baud-config-view.fxml"));
@@ -233,6 +296,9 @@ public class MainController implements SerialListener {
         dialog.showAndWait();
     }
 
+    /**
+     * Opens a simple "About" modal showing app version, author, and licensing info.
+     */
     @FXML
     public void openAboutMenu() {
         Label infoLabel = new Label("WireTap v" + WireTap.VERSION +
@@ -256,6 +322,9 @@ public class MainController implements SerialListener {
         dialog.showAndWait();
     }
 
+    /**
+     * Opens the GitHub project page for WireTap in the system browser.
+     */
     @FXML
     public void openSourceCode() {
         try {
@@ -263,6 +332,9 @@ public class MainController implements SerialListener {
         } catch (Exception ignored) {}
     }
 
+    /**
+     * Opens a modal window showing detailed information about each available serial port.
+     */
     @FXML
     public void openPortInspector() {
         FXMLLoader loader = new FXMLLoader(WireTap.class.getResource("port-inspector-view.fxml"));
@@ -284,10 +356,18 @@ public class MainController implements SerialListener {
         dialog.showAndWait();
     }
 
+    /**
+     * Returns the currently selected serial port name.
+     * @return the selected system port name as a String
+     */
     public String getSelectedPort() {
         return selectedPort;
     }
 
+    /**
+     * Sets the selected port and updates dependent UI and connection settings.
+     * @param selectedPort the name of the port to select
+     */
     public void setSelectedPort(String selectedPort) {
         this.selectedPort = selectedPort;
         portComboBox.setValue(selectedPort);
