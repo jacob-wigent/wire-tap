@@ -15,6 +15,9 @@ public class SerialService {
     private static SerialPort currentPort;
     private static ArrayList<SerialListener> listeners = new ArrayList<>();
 
+    private static final String MOCK_PORT_NAME = "Emulated";
+    private static final EmulatedSerialPort emulatedPort = new EmulatedSerialPort();
+
     public static void addListener(SerialListener l) {
         listeners.add(l);
     }
@@ -23,22 +26,34 @@ public class SerialService {
 
     public static String[] getAvailablePortNames() {
         SerialPort[] serialPorts = SerialPort.getCommPorts();
-        String[] portNames = new String[serialPorts.length];
+        String[] portNames = new String[serialPorts.length + 1];
 
         for (int i = 0; i < serialPorts.length; i++) {
             portNames[i] = serialPorts[i].getSystemPortName();
         }
+
+        portNames[serialPorts.length] = MOCK_PORT_NAME;
         return portNames;
     }
 
     public static boolean tryConnect() {
-        if (!currentPort.openPort()) { return false; }
+        if (MOCK_PORT_NAME.equals(getCurrentPortName())) {
+            emulatedPort.openPort();
+            currentConnectionStartTime = System.currentTimeMillis();
+            return true;
+        }
+
+        if (currentPort == null || !currentPort.openPort()) return false;
         addEventListeners(currentPort);
         currentConnectionStartTime = System.currentTimeMillis();
         return true;
     }
 
     public static boolean tryDisconnect() {
+        if (MOCK_PORT_NAME.equals(getCurrentPortName())) {
+            return emulatedPort.closePort();
+        }
+
         if (!currentPort.isOpen()) return true;
         return currentPort.closePort();
     }
@@ -85,23 +100,42 @@ public class SerialService {
     }
 
     public static boolean isConnected() {
-        if (currentPort == null) { return false; }
-        return currentPort.isOpen();
+        if (MOCK_PORT_NAME.equals(getCurrentPortName())) {
+            return emulatedPort.isOpen();
+        }
+        return currentPort != null && currentPort.isOpen();
     }
 
     public static int getCurrentBaudRate() {
-        if (currentPort == null) { return 0; }
-        return currentPort.getBaudRate();
+        if (MOCK_PORT_NAME.equals(getCurrentPortName())) {
+            return emulatedPort.getBaudRate();
+        }
+        return currentPort == null ? 0 : currentPort.getBaudRate();
     }
 
     public static void selectBaudRate(int baudRate) {
-        if(currentPort == null) { return; }
-        currentPort.setBaudRate(baudRate);
-        //TODO: Live baud rate updates?
+        if (MOCK_PORT_NAME.equals(getCurrentPortName())) {
+            emulatedPort.setBaudRate(baudRate);
+        } else if (currentPort != null) {
+            currentPort.setBaudRate(baudRate);
+        }
     }
 
     public static void selectPort(String portName) {
-        currentPort = SerialPort.getCommPort(portName);
+        if (MOCK_PORT_NAME.equals(portName)) {
+            currentPort = null; // Null signals we're using the mock
+        } else {
+            currentPort = SerialPort.getCommPort(portName);
+        }
+    }
+
+    public static String getCurrentPortName() {
+        if (currentPort != null) return currentPort.getSystemPortName();
+        return MOCK_PORT_NAME;
+    }
+
+    public static String getConnectionInfo() {
+        return getCurrentPortName() + " @ " + getCurrentBaudRate();
     }
 
     public static SerialPort getCurrentPort() {
@@ -113,17 +147,27 @@ public class SerialService {
     }
 
     public static long getElapsedConnectionTime() {
-        if(currentPort == null) { return 0; }
-        if(!currentPort.isOpen()) { return 0; }
+        if (MOCK_PORT_NAME.equals(getCurrentPortName())) {
+            return System.currentTimeMillis() - currentConnectionStartTime;
+        }
+
+        if (currentPort == null || !currentPort.isOpen()) return 0;
         return System.currentTimeMillis() - currentConnectionStartTime;
     }
 
     public static void kill() {
-        if (currentPort == null) {
-            return;
-        }
-        currentPort.closePort();
+        if (currentPort != null) currentPort.closePort();
         currentPort = null;
         listeners = null;
+    }
+
+    // Simulate data on the emulated port
+    public static void fireEmulatedMessage(String msg) {
+        if (!MOCK_PORT_NAME.equals(getCurrentPortName())) { return; }
+        if (listeners != null) {
+            for (SerialListener l : listeners) {
+                l.onSerialData(new SerialMessage(msg, getElapsedConnectionTime(), LocalDateTime.now()));
+            }
+        }
     }
 }

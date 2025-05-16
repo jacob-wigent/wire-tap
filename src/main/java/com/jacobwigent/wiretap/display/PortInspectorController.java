@@ -89,10 +89,53 @@ public class PortInspectorController {
             portList.getChildren().add(row);
         }
 
+        addEmulatedPort();
 
         if (SerialService.isConnected()) {
             selectButton.setDisable(true);
         }
+    }
+
+    private void addEmulatedPort() {
+        HBox row = new HBox(10);
+        row.setPadding(new Insets(6));
+        row.setAlignment(Pos.CENTER_LEFT);
+
+        // Main COM port (bold and large)
+        Label comLabel = new Label("Emulated");
+        comLabel.setFont(Font.font("System", FontWeight.BOLD, 18));
+
+        // Descriptive name
+        String description = "Emulated Serial Port";
+        Label descLabel = new Label(description);
+        descLabel.setFont(Font.font(13));
+
+        // Optional extra info
+        Label manufacturer = new Label("Manufacturer: Jacob Wigent");
+        Label portDescription = new Label("Description: Emulated Serial Port for Testing");
+        Label serial = new Label("Serial #: 123-456-789");
+        manufacturer.setTextFill(Color.DARKGRAY);
+        portDescription.setTextFill(Color.DARKGRAY);
+        serial.setTextFill(Color.DARKGRAY);
+
+        VBox infoBox = new VBox(2, comLabel, descLabel, manufacturer, portDescription, serial);
+
+        // Highlight selected port
+        if (selectedPort != null && selectedPort.equals("Emulated")) {
+            row.setStyle("-fx-background-color: rgba(0, 0, 0, 0.1);");
+        }
+
+        row.getChildren().add(infoBox);
+
+        row.setOnMouseClicked(e -> {
+            if (!Objects.equals(selectedPort, "Emulated")) {
+                selectButton.setDisable(false);
+            }
+            selectedPort = "Emulated";
+            updateDisplay();
+        });
+
+        portList.getChildren().add(row);
     }
 
     @FXML

@@ -163,7 +163,7 @@ public class MainController implements SerialListener {
             connectButton.setDisable(true);
         }
 
-        connectionStatusLabel.setText(connected ? "Connected to " + SerialService.getCurrentPort().getDescriptivePortName() + " @ " + SerialService.getCurrentPort().getBaudRate() : "Not Connected");
+        connectionStatusLabel.setText(connected ? "Connected to " + SerialService.getConnectionInfo() : "Not Connected");
     }
 
     @Override
