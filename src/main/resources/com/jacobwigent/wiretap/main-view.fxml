@@ -2,7 +2,6 @@
 
 <?import com.jacobwigent.wiretap.display.*?>
 <?import javafx.geometry.*?>
-<?import javafx.scene.chart.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
@@ -79,6 +78,9 @@
                         <padding>
                           <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                         </padding>
+                                 <font>
+                                    <Font name="Monospaced Regular" size="12.0" />
+                                 </font>
                       </SerialMonitor>
                     </children>
                   </VBox>
@@ -88,7 +90,7 @@
             <Tab text="Plotter">
               <AnchorPane>
                      <children>
-                         <SerialPlotter fx:id="serialPlotter" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                         <SerialPlotter fx:id="serialPlotter" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                      </children>
               </AnchorPane>
             </Tab>

@@ -54,7 +54,10 @@ public class SerialPlotter extends LineChart<Number, Number> {
                 }
                 lastMessageTime = message.getElapsedMillis();
                 double x = lastMessageTime / 1000.0;
-                series.getData().add(new XYChart.Data<>(x, y));
+                Data<Number, Number> data = new XYChart.Data<>(x, y);
+                series.getData().add(data);
+                data.getNode().setOnMouseClicked(e ->
+                        System.out.println("Click on data (" + data.getXValue() + "," + data.getYValue() + ")"));
             }
         } catch (NumberFormatException e) {
             // Ignore non-numeric messages
